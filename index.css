@@ -1,0 +1,57 @@
+body {
+    background: #f7f4da;
+    display: flex;
+    justify-content: center;
+    margin-top: 60px;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    background: #0f2138;
+    width: 550px;
+    padding: 30px;
+    border-radius: 20px;
+    display: flex;
+    justify-content: space-around;
+    color: white;
+}
+
+/* Both HOME and GUEST sections */
+.container div {
+    text-align: center;
+}
+
+/* Scoreboard number box */
+#home-score,
+#guest-score {
+    background: black;
+    width: 120px;
+    height: 80px;
+    margin: 15px auto;
+    color: #ff3b1f;      /* RED LIKE DIGITAL DISPLAY */
+    font-size: 55px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 6px;
+}
+
+/* Buttons */
+button {
+    margin: 5px;
+    padding: 8px 15px;
+    background: transparent;
+    border: 2px solid #7d8aa5;
+    color: white;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #22344e;
+}
+
+
+
