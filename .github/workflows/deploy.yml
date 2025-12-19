@@ -14,9 +14,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      # 1. Checkout code from GitHub
+      - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2. Login to Azure using OIDC
       - name: Azure Login
         uses: azure/login@v2
         with:
@@ -24,21 +26,23 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Login to ACR
+      # 3. Login to Azure Container Registry
+      - name: Login to Azure Container Registry
         run: az acr login --name ${{ secrets.ACR_NAME }}
 
+      # 4. Build Docker image
       - name: Build Docker image
         run: docker build -t counter-app .
 
+      # 5. Tag Docker image with commit SHA
       - name: Tag Docker image
-        run: |
-          docker tag counter-app \
-          ${{ secrets.ACR_LOGIN_SERVER }}/counter-app:${{ github.sha }}
+        run: docker tag counter-app ${{ secrets.ACR_LOGIN_SERVER }}/counter-app:${{ github.sha }}
 
-      - name: Push Docker image
-        run: docker push \
-          ${{ secrets.ACR_LOGIN_SERVER }}/counter-app:${{ github.sha }}
+      # 6. Push Docker image to ACR
+      - name: Push Docker image to ACR
+        run: docker push ${{ secrets.ACR_LOGIN_SERVER }}/counter-app:${{ github.sha }}
 
+      # 7. Deploy Docker image to Azure App Service
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v3
         with:
