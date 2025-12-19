@@ -24,7 +24,17 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Login to Azure Container Registry
+        run: az acr login --name ${{ secrets.ACR_NAME }}
+
+      - name: Build Docker image
+        run: docker build -t counter-app .
+
+      - name: Tag Docker image
+        run: docker tag counter-app ${{ secrets.ACR_LOGIN_SERVER }}/counter-app:${{ github.sha }}
+
       - name: Push Docker image
-        run: docker push \
-          ${{ secrets.ACR_LOGIN_SERVER }}/counter-app:${{ github.sha }}
+        run: docker push ${{ secrets.ACR_LOGIN_SERVER }}/counter-app:${{ github.sha }}
+
+
 
