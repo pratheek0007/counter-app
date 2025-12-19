@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout code from GitHub
+      # 1. Checkout source code
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -34,17 +34,22 @@ jobs:
       - name: Build Docker image
         run: docker build -t counter-app .
 
-      # 5. Tag Docker image with commit SHA
+      # 5. DEBUG: verify full image name (very important)
+      - name: Debug image reference
+        run: echo "IMAGE=${{ secrets.ACR_LOGIN_SERVER }}/counter-app:${{ github.sha }}"
+
+      # 6. Tag Docker image (SINGLE LINE – no backslashes)
       - name: Tag Docker image
         run: docker tag counter-app ${{ secrets.ACR_LOGIN_SERVER }}/counter-app:${{ github.sha }}
 
-      # 6. Push Docker image to ACR
-      - name: Push Docker image to ACR
+      # 7. Push Docker image to ACR
+      - name: Push Docker image
         run: docker push ${{ secrets.ACR_LOGIN_SERVER }}/counter-app:${{ github.sha }}
 
-      # 7. Deploy Docker image to Azure App Service
+      # 8. Deploy image to Azure App Service
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           images: ${{ secrets.ACR_LOGIN_SERVER }}/counter-app:${{ github.sha }}
+
