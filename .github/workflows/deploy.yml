@@ -5,16 +5,18 @@ on:
     branches:
       - main
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build-push-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Login to Azure
       - name: Azure Login
         uses: azure/login@v2
         with:
@@ -22,30 +24,23 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      # 3. Login to ACR
       - name: Login to ACR
         run: az acr login --name ${{ secrets.ACR_NAME }}
 
-      # 4. Build Docker image
       - name: Build Docker image
         run: docker build -t counter-app .
 
-      # 5. Tag image
       - name: Tag Docker image
         run: |
           docker tag counter-app \
           ${{ secrets.ACR_LOGIN_SERVER }}/counter-app:${{ github.sha }}
 
-      # 6. Push image to ACR
       - name: Push Docker image
         run: docker push \
           ${{ secrets.ACR_LOGIN_SERVER }}/counter-app:${{ github.sha }}
 
-      # 7. Deploy to Azure App Service
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           images: ${{ secrets.ACR_LOGIN_SERVER }}/counter-app:${{ github.sha }}
-
-
