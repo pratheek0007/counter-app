@@ -41,10 +41,8 @@ jobs:
       # 6. Tag Docker image (SINGLE LINE – no backslashes)
       - name: Tag Docker image
         run: docker tag counter-app ${{ secrets.ACR_LOGIN_SERVER }}/counter-app:${{ github.sha }}
-
       # 7. Push Docker image to ACR
-      - name: Push Docker image
-        run: docker push ${{ secrets.ACR_LOGIN_SERVER }}/counter-app:${{ github.sha }}
+      - run: docker push ${{ secrets.ACR_LOGIN_SERVER }}/counter-app:${{ github.sha }}
 
       # 8. Deploy image to Azure App Service
       - name: Deploy to Azure App Service
@@ -52,4 +50,5 @@ jobs:
         with:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           images: ${{ secrets.ACR_LOGIN_SERVER }}/counter-app:${{ github.sha }}
+
 
