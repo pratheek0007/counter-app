@@ -1,0 +1,30 @@
+{
+  "family": "counterapp",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::194722422722:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::194722422722:role/ecsTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "counterapp",
+      "image": "194722422722.dkr.ecr.us-east-1.amazonaws.com/test/counterapp",
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true,
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/counterapp",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}
