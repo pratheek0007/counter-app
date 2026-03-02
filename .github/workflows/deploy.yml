@@ -14,7 +14,7 @@ permissions:
   id-token: write
 
 env:
-  REPO_NAME: test/counterapp
+  REPO_NAME: counterapp
 
 jobs:
   BuildAndPush:
@@ -56,7 +56,7 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: counterapp-service-xfjk7zqh
+          service: counterapp-service
           cluster: counterapp-cluster
 
           wait-for-service-stability: true

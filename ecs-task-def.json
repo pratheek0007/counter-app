@@ -9,10 +9,10 @@
   "containerDefinitions": [
     {
       "name": "counterapp",
-      "image": "194722422722.dkr.ecr.us-east-1.amazonaws.com/test/counterapp",
+      "image": "194722422722.dkr.ecr.us-east-1.amazonaws.com/counterapp",
       "portMappings": [
         {
-          "containerPort": 8080,
+          "containerPort": 80,
           "protocol": "tcp"
         }
       ],
