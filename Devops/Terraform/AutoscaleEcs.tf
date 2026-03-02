@@ -1,6 +1,7 @@
 # ECS Auto Scaling Configuration
 
 terraform {
+  required_version = ">= 1.0"  # ✅ ADDED
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -24,11 +25,13 @@ variable "aws_region" {
 variable "cluster_name" {
   description = "Name of the ECS cluster"
   type        = string
+  default     = "counterapp-cluster" 
 }
 
 variable "service_name" {
   description = "Name of the ECS service"
   type        = string
+  default     = "counterapp-service-xfjk7zqh"  
 }
 
 variable "min_capacity" {
@@ -61,13 +64,6 @@ variable "scale_in_cooldown" {
   default     = 300
 }
 
-# DATA SOURCES
-
-data "aws_ecs_service" "this" {
-  name    = var.service_name
-  cluster = var.cluster_name
-}
-
 
 # RESOURCES
 
@@ -78,8 +74,7 @@ resource "aws_appautoscaling_target" "ecs_target" {
   resource_id        = "service/${var.cluster_name}/${var.service_name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
-
-  depends_on = [data.aws_ecs_service.this]
+  # ✅ Removed depends_on (no longer needed)
 }
 
 # CPU-based Target Tracking Scaling Policy
