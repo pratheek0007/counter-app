@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'terraform/**'
+      - 'Devops/Terraform/**'
       - '.github/workflows/terraform.yml'
   workflow_dispatch:
 
@@ -40,38 +40,56 @@ jobs:
 
       - name: Terraform Format Check
         id: fmt
-        run: terraform fmt -check -recursive terraform/
+        run: terraform fmt -check -recursive Devops/Terraform/
         continue-on-error: true
 
       - name: Terraform Init
         id: init
         run: |
-          cd terraform/
+          cd Devops/Terraform/
           terraform init
 
       - name: Terraform Validate
         id: validate
         run: |
-          cd terraform/
+          cd Devops/Terraform/
           terraform validate
 
       - name: Terraform Plan
         id: plan
         run: |
-          cd terraform/
-          terraform plan -no-color -out=tfplan
+          cd Devops/Terraform/
+          terraform plan -var-file="Autoscalevar.tfvars" -no-color -out=tfplan
 
       - name: Terraform Apply (Auto-approve for main branch)
         if: github.ref == 'refs/heads/main'
         run: |
-          cd terraform/
+          cd Devops/Terraform/
           terraform apply -auto-approve tfplan
 
       - name: Get Terraform Outputs
         if: github.ref == 'refs/heads/main'
         run: |
-          cd terraform/
+          cd Devops/Terraform/
           terraform output -json
+
+      - name: Display Auto-Scaling Config
+        if: github.ref == 'refs/heads/main'
+        run: |
+          cd Devops/Terraform/
+          echo " Auto-Scaling Configuration Applied Successfully!"
+          echo ""
+          echo " Configuration Details:"
+          terraform output
+          echo ""
+          echo "    Your ECS service will now:"
+          echo "  • Start with 1 task"
+          echo "  • Scale up to 5 tasks when CPU > 80%"
+          echo "  • Scale down when CPU < 80%"
+          echo ""
+          echo "⏱️ Scaling Cooldowns:"
+          echo "  • Scale Out: 60 seconds"
+          echo "  • Scale In: 300 seconds"
 
       - name: Comment PR with Plan
         if: github.event_name == 'pull_request'
@@ -80,10 +98,16 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const plan = fs.readFileSync('terraform/tfplan', 'utf8');
+            const plan = fs.readFileSync('Devops/Terraform/tfplan', 'utf8');
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## Terraform Plan\n\`\`\`\n${plan}\n\`\`\``
+              body: `## Terraform Plan 📋\n\`\`\`\n${plan}\n\`\`\`\n\n**Auto-Scaling Configuration:**\n- Cluster: counterapp-cluster\n- Service: counterapp-service-xfjk7zqh\n- Min Tasks: 1\n- Max Tasks: 5\n- Target CPU: 80%`
             });
+
+      - name: Failure Summary
+        if: failure()
+        run: |
+          echo "❌ Terraform workflow failed"
+          echo "Check the logs above for details"
