@@ -59,7 +59,7 @@ jobs:
         id: plan
         run: |
           cd Devops/Terraform/
-          terraform plan -var-file="Autoscalevar.tfvars" -no-color -out=tfplan
+          terraform plan -var-file="AutoscaleVar.Tfvars" -no-color -out=tfplan
 
       - name: Terraform Apply (Auto-approve for main branch)
         if: github.ref == 'refs/heads/main'
