@@ -7,107 +7,40 @@ on:
     paths:
       - 'Devops/Terraform/**'
       - '.github/workflows/terraform.yml'
-  workflow_dispatch:
 
 permissions:
   contents: read
   id-token: write
 
-env:
-  TERRAFORM_VERSION: 1.6.0
-  AWS_REGION: us-east-1
-
 jobs:
   terraform:
-    name: Terraform
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: us-east-1
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: ${{ env.TERRAFORM_VERSION }}
-
-      - name: Terraform Format Check
-        id: fmt
-        run: terraform fmt -check -recursive Devops/Terraform/
-        continue-on-error: true
 
       - name: Terraform Init
-        id: init
         run: |
-          cd Devops/Terraform/
+          cd Devops/Terraform
           terraform init
 
-      - name: Terraform Validate
-        id: validate
-        run: |
-          cd Devops/Terraform/
-          terraform validate
-
       - name: Terraform Plan
-        id: plan
         run: |
-          cd Devops/Terraform/
-          terraform plan -var-file="AutoscaleVar.Tfvars" -no-color -out=tfplan
+          cd Devops/Terraform
+          terraform plan -var-file="AutoscaleVar.Tfvars"
 
-      - name: Terraform Apply (Auto-approve for main branch)
-        if: github.ref == 'refs/heads/main'
+      - name: Terraform Apply
         run: |
-          cd Devops/Terraform/
-          terraform apply -auto-approve tfplan
-
-      - name: Get Terraform Outputs
-        if: github.ref == 'refs/heads/main'
-        run: |
-          cd Devops/Terraform/
-          terraform output -json
-
-      - name: Display Auto-Scaling Config
-        if: github.ref == 'refs/heads/main'
-        run: |
-          cd Devops/Terraform/
-          echo " Auto-Scaling Configuration Applied Successfully!"
-          echo ""
-          echo " Configuration Details:"
-          terraform output
-          echo ""
-          echo "    Your ECS service will now:"
-          echo "  • Start with 1 task"
-          echo "  • Scale up to 5 tasks when CPU > 80%"
-          echo "  • Scale down when CPU < 80%"
-          echo ""
-          echo "⏱️ Scaling Cooldowns:"
-          echo "  • Scale Out: 60 seconds"
-          echo "  • Scale In: 300 seconds"
-
-      - name: Comment PR with Plan
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const plan = fs.readFileSync('Devops/Terraform/tfplan', 'utf8');
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `## Terraform Plan 📋\n\`\`\`\n${plan}\n\`\`\`\n\n**Auto-Scaling Configuration:**\n- Cluster: counterapp-cluster\n- Service: counterapp-service-xfjk7zqh\n- Min Tasks: 1\n- Max Tasks: 5\n- Target CPU: 80%`
-            });
-
-      - name: Failure Summary
-        if: failure()
-        run: |
-          echo "❌ Terraform workflow failed"
-          echo "Check the logs above for details"
+          cd Devops/Terraform
+          terraform apply -auto-approve -var-file="AutoscaleVar.Tfvars"
