@@ -3,7 +3,7 @@ let gscore=document.getElementById("guest-score")
 let thescore=0
 let thescoreg=0
 function plusone(){
-    thescore+=10
+    thescore+=1
     hscore.textContent=thescore
 }
 function plustwo(){
@@ -15,7 +15,7 @@ function plusthree(){
     hscore.textContent=thescore
 }
 function plusoneg(){
-    thescoreg+=10
+    thescoreg+=1
     gscore.textContent=thescoreg
 }
 function plustwog(){
